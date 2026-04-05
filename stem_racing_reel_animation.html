@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STEM Racing Reel Animation</title>
+<style>
+:root{
+  --bg:#050505;
+  --panel:#242321;
+  --panel2:#171717;
+  --grid:#d9d9d944;
+  --text:#f4f0e6;
+  --muted:#bbb3a6;
+  --blue:#4a90d9;
+  --orange:#c57e16;
+  --purple:#5d50ba;
+  --green:#2aa278;
+  --pink:#d45783;
+  --pressure:#5a4eb7;
+  --teal:#28a488;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#000;
+  color:var(--text);
+  font-family:Arial, Helvetica, sans-serif;
+}
+.reel{
+  width:1080px;
+  min-height:1920px;
+  margin:0 auto;
+  background:radial-gradient(circle at top, #111 0%, #050505 34%, #000 100%);
+  padding:56px 48px 52px;
+  position:relative;
+  overflow:hidden;
+}
+.reel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.02), transparent 16%),
+    linear-gradient(90deg, rgba(255,255,255,.03), transparent 35%, rgba(255,255,255,.02) 80%, transparent);
+  pointer-events:none;
+}
+h1{
+  margin:0 0 20px;
+  font-size:42px;
+  line-height:1.05;
+  font-weight:900;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+.subhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:30px;
+  color:var(--muted);
+  font-size:20px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.phase-pill{
+  background:#111;
+  border:1px solid #3a3a3a;
+  border-radius:999px;
+  padding:8px 16px;
+  color:#f6d38f;
+  font-weight:700;
+}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+  margin-bottom:34px;
+}
+.card{
+  background:var(--panel);
+  border-radius:16px;
+  padding:24px 24px 22px;
+  min-height:150px;
+  box-shadow:0 15px 40px rgba(0,0,0,.2);
+}
+.label{
+  color:var(--text);
+  font-size:30px;
+  line-height:1.15;
+  opacity:.92;
+}
+.value{
+  margin-top:10px;
+  font-size:56px;
+  font-weight:800;
+  letter-spacing:-.04em;
+}
+.delta{
+  margin-top:8px;
+  font-size:28px;
+  color:var(--muted);
+  line-height:1.2;
+}
+.delta .good{color:#22d39b}
+.delta .accent{color:#f6d38f}
+.section{
+  margin-bottom:34px;
+}
+.section-title{
+  margin:0 0 14px;
+  font-size:20px;
+  letter-spacing:.03em;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.chart-card{
+  background:transparent;
+}
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:24px;
+  margin-bottom:10px;
+  font-size:15px;
+  color:var(--text);
+  font-weight:700;
+}
+.legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+}
+.legend i{
+  width:15px;
+  height:15px;
+  display:inline-block;
+}
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:28px;
+  margin-bottom:28px;
+}
+svg{
+  width:100%;
+  display:block;
+}
+.footnote{
+  margin-top:18px;
+  color:#d7cdbd;
+  font-size:17px;
+  line-height:1.35;
+}
+.timeline{
+  margin-top:22px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.timeline-step{
+  background:#131313;
+  border:1px solid #2f2f2f;
+  border-radius:999px;
+  padding:12px 16px;
+  color:#938a7f;
+  text-align:center;
+  font-size:16px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  transition:all .25s ease;
+}
+.timeline-step.active{
+  color:#fff;
+  border-color:#f6d38f;
+  box-shadow:0 0 0 1px rgba(246,211,143,.15), 0 0 25px rgba(246,211,143,.1);
+}
+.timeline-step.done{
+  color:#c8fff0;
+  border-color:#1f7f61;
+}
+.caption{
+  position:absolute;
+  left:48px;
+  right:48px;
+  bottom:28px;
+  display:flex;
+  justify-content:space-between;
+  color:#cfc5b8;
+  font-size:18px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.caption strong{color:#fff}
+.hide-overflow{
+  overflow:hidden;
+}
+</style>
+</head>
+<body>
+  <div class="reel">
+    <h1>Final Car Vs Best Previous Iteration</h1>
+    <div class="subhead">
+      <div>Animated CFD Comparison Reel</div>
+      <div class="phase-pill" id="phaseLabel">Booting Analysis</div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="label">Drag coefficient (Cd)</div>
+        <div class="value" id="cdCard">0.000</div>
+        <div class="delta" id="cdDelta">Starting from zero</div>
+      </div>
+      <div class="card">
+        <div class="label">Drag force (N)</div>
+        <div class="value" id="dragCard">0.0</div>
+        <div class="delta" id="dragDelta">Waiting for first run</div>
+      </div>
+      <div class="card">
+        <div class="label">Lift coefficient (Cl)</div>
+        <div class="value" id="clCard">0.000</div>
+        <div class="delta" id="clDelta">No downforce yet</div>
+      </div>
+      <div class="card">
+        <div class="label">L/D ratio</div>
+        <div class="value" id="ldCard">0.000</div>
+        <div class="delta" id="ldDelta">Iteration efficiency</div>
+      </div>
+    </div>
+
+    <div class="section chart-card">
+      <h2 class="section-title">Drag Coefficient Across Iterations</h2>
+      <div class="legend">
+        <span><i style="background:var(--blue)"></i>Corrected Cd (prior iterations)</span>
+        <span><i style="background:var(--green)"></i>Final car Cd</span>
+      </div>
+      <svg viewBox="0 0 980 340" id="barCd"></svg>
+    </div>
+
+    <div class="section chart-card">
+      <h2 class="section-title">Drag Force (N) - Corrected Values At Respective Test Speeds</h2>
+      <div class="legend">
+        <span><i style="background:var(--orange)"></i>Corrected drag force (N)</span>
+        <span><i style="background:var(--green)"></i>Final car</span>
+      </div>
+      <svg viewBox="0 0 980 340" id="barDrag"></svg>
+    </div>
+
+    <div class="row">
+      <div class="section chart-card">
+        <h2 class="section-title">Pressure Vs Skin Friction Drag (N)</h2>
+        <div class="legend">
+          <span><i style="background:var(--pressure)"></i>Pressure drag</span>
+          <span><i style="background:var(--pink)"></i>Skin drag</span>
+        </div>
+        <svg viewBox="0 0 470 320" id="stackedDrag"></svg>
+      </div>
+      <div class="section chart-card">
+        <h2 class="section-title">L/D Ratio Across Iterations</h2>
+        <div class="legend">
+          <span><i style="background:var(--teal)"></i>L/D ratio (more negative = more downforce efficiency)</span>
+        </div>
+        <svg viewBox="0 0 470 320" id="lineLd"></svg>
+      </div>
+    </div>
+
+    <div class="section chart-card">
+      <h2 class="section-title">Wake Velocity Profile - All Iterations</h2>
+      <div class="legend">
+        <span><i style="background:var(--blue)"></i>Rear geo</span>
+        <span><i style="background:var(--orange)"></i>Rear wing update</span>
+        <span><i style="background:var(--purple)"></i>V2</span>
+        <span><i style="background:var(--green)"></i>Final car</span>
+      </div>
+      <svg viewBox="0 0 980 330" id="wakeChart"></svg>
+    </div>
+
+    <div class="section chart-card">
+      <h2 class="section-title">Cp Profile - All Iterations</h2>
+      <div class="legend">
+        <span><i style="background:var(--blue)"></i>Rear geo</span>
+        <span><i style="background:var(--orange)"></i>Rear wing update</span>
+        <span><i style="background:var(--purple)"></i>V2</span>
+        <span><i style="background:var(--green)"></i>Final car</span>
+      </div>
+      <svg viewBox="0 0 980 330" id="cpChart"></svg>
+      <div class="footnote" id="footerNote">Graphs animate from zero, cycle through design changes, and settle on the final car for a reel-ready comparison.</div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <div class="caption">
+      <div><strong id="iterationLabel">System Warmup</strong></div>
+      <div id="timerLabel">0.0s / 16.0s</div>
+    </div>
+  </div>
+
+<script>
+const iterations = [
+  {
+    name: 'Rear geo',
+    short: 'Rear geo',
+    color: '#4a90d9',
+    cd: 0.300,
+    drag: 81.2,
+    cl: -0.082,
+    ld: -0.886,
+    pressure: 58.0,
+    skin: 22.4
+  },
+  {
+    name: 'Rear wing update',
+    short: 'Rear wing',
+    color: '#c57e16',
+    cd: 0.306,
+    drag: 92.8,
+    cl: -0.111,
+    ld: -0.838,
+    pressure: 67.1,
+    skin: 25.1
+  },
+  {
+    name: 'V2',
+    short: 'V2',
+    color: '#5d50ba',
+    cd: 0.307,
+    drag: 95.3,
+    cl: -0.129,
+    ld: -0.826,
+    pressure: 68.0,
+    skin: 27.0
+  },
+  {
+    name: 'Final car',
+    short: 'Final car',
+    color: '#2aa278',
+    cd: 0.276,
+    drag: 84.8,
+    cl: -0.209,
+    ld: -0.757,
+    pressure: 60.3,
+    skin: 24.5
+  }
+];
+
+const phases = [
+  { start: 0.0, end: 2.6, index: -1, label: 'Booting Analysis', note: 'Starting from zero to show the analysis warming up.' },
+  { start: 2.6, end: 5.5, index: 0, label: 'Iteration 1 - Rear geo', note: 'First body package enters with the baseline drag and wake profile.' },
+  { start: 5.5, end: 8.6, index: 1, label: 'Iteration 2 - Rear wing update', note: 'Rear wing update shifts the force balance and slightly raises drag.' },
+  { start: 8.6, end: 11.7, index: 2, label: 'Iteration 3 - V2', note: 'V2 continues refining the body while the wake and Cp lines keep fluctuating.' },
+  { start: 11.7, end: 16.0, index: 3, label: 'Final iteration - Final car', note: 'Final car settles with the lowest Cd and strongest downforce efficiency.' }
+];
+
+const duration = 16.0;
+const fpsJitter = 0.035;
+const axisColor = '#e2dbcf';
+const gridColor = 'rgba(233,229,220,0.38)';
+const muted = '#cbbfae';
+
+function qs(id){ return document.getElementById(id); }
+
+function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+function easeInOut(x){ return x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2; }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function lerp(a,b,t){ return a + (b-a)*t; }
+function formatSigned(v, d){ return (v >= 0 ? '+' : '\u2212') + Math.abs(v).toFixed(d); }
+
+function buildTimeline(){
+  qs('timeline').innerHTML = iterations.map(it =>
+    `<div class="timeline-step" data-step="${it.name}">${it.name}</div>`
+  ).join('');
+}
+
+function currentPhase(t){
+  return phases.find(p => t >= p.start && t < p.end) || phases[phases.length - 1];
+}
+
+function activeAmount(t, idx){
+  const p = phases.find(ph => ph.index === idx);
+  if(!p) return 0;
+  if(t <= p.start) return 0;
+  if(t >= p.end) return 1;
+  return easeOutCubic((t - p.start) / (p.end - p.start));
+}
+
+function seriesNoise(seed, t, scale){
+  return Math.sin(t * 2.5 + seed) * scale + Math.sin(t * 7.4 + seed * 0.7) * scale * 0.4;
+}
+
+function getDisplayedMetrics(t){
+  let cd = 0, drag = 0, cl = 0, ld = 0, pressure = [0,0,0,0], skin = [0,0,0,0];
+  const cdBars = [], dragBars = [], ldLine = [];
+
+  iterations.forEach((it, i) => {
+    const a = activeAmount(t, i);
+    const pulse = a > 0 ? 1 + seriesNoise(i + 0.5, t, 0.015) : 1;
+    cdBars.push(Math.max(0, it.cd * a * pulse));
+    dragBars.push(Math.max(0, it.drag * a * (1 + seriesNoise(i + 1.2, t, 0.01))));
+    pressure[i] = Math.max(0, it.pressure * a * (1 + seriesNoise(i + 2.4, t, 0.012)));
+    skin[i] = Math.max(0, it.skin * a * (1 + seriesNoise(i + 4.1, t, 0.018)));
+    ldLine.push(it.ld * a + (a > 0 ? seriesNoise(i + 3.5, t, 0.004) : 0));
+  });
+
+  const phase = currentPhase(t);
+  if(phase.index === -1){
+    const intro = easeOutCubic(clamp(t / 2.6, 0, 1));
+    cd = 0.276 * intro * 0.2;
+    drag = 84.8 * intro * 0.15;
+    cl = -0.209 * intro * 0.15;
+    ld = -0.757 * intro * 0.15;
+  } else {
+    const it = iterations[phase.index];
+    const a = activeAmount(t, phase.index);
+    const flicker = 1 + seriesNoise(phase.index + 8.2, t, fpsJitter);
+    cd = Math.max(0, it.cd * a * flicker);
+    drag = Math.max(0, it.drag * a * (1 + seriesNoise(phase.index + 11.0, t, 0.012)));
+    cl = it.cl * a + seriesNoise(phase.index + 12.0, t, 0.005);
+    ld = it.ld * a + seriesNoise(phase.index + 14.0, t, 0.007);
+  }
+
+  return { phase, cd, drag, cl, ld, cdBars, dragBars, pressure, skin, ldLine };
+}
+
+function drawGrid(svg, x, y, w, h, yTicks, xTicks){
+  let out = '';
+  for(let i = 0; i <= yTicks; i++){
+    const py = y + h - (i / yTicks) * h;
+    out += `<line x1="${x}" y1="${py}" x2="${x+w}" y2="${py}" stroke="${gridColor}" stroke-width="1.2"/>`;
+  }
+  for(let i = 0; i <= xTicks; i++){
+    const px = x + (i / xTicks) * w;
+    out += `<line x1="${px}" y1="${y}" x2="${px}" y2="${y+h}" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>`;
+  }
+  return out;
+}
+
+function drawBarChart(svgId, values, maxVal, yLabel, colors, labels, decimals){
+  const svg = qs(svgId);
+  const W = 980, H = 340;
+  const x = 70, y = 28, w = 880, h = 230;
+  const barW = 164;
+  let html = `<rect width="${W}" height="${H}" fill="transparent"/>`;
+  html += drawGrid(svg, x, y, w, h, 7, 0);
+  html += `<line x1="${x}" y1="${y+h}" x2="${x+w}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  html += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  for(let i = 0; i <= 7; i++){
+    const tickVal = (maxVal / 7) * i;
+    const py = y + h - (i / 7) * h;
+    html += `<text x="${x-16}" y="${py+6}" fill="${axisColor}" font-size="18" text-anchor="end">${tickVal.toFixed(decimals)}</text>`;
+  }
+  html += `<text x="28" y="${y + h/2}" fill="${axisColor}" font-size="22" transform="rotate(-90 28 ${y + h/2})">${yLabel}</text>`;
+  values.forEach((val, i) => {
+    const bx = x + 40 + i * 220;
+    const bh = clamp(val / maxVal, 0, 1) * h;
+    const by = y + h - bh;
+    html += `<rect x="${bx}" y="${by}" width="${barW}" height="${bh}" rx="4" fill="${colors[i]}"/>`;
+    html += `<text x="${bx + barW/2}" y="${y + h + 32}" fill="${axisColor}" font-size="22" text-anchor="middle">${labels[i]}</text>`;
+  });
+  svg.innerHTML = html;
+}
+
+function drawStackedChart(valuesA, valuesB){
+  const svg = qs('stackedDrag');
+  const W = 470, H = 320;
+  const x = 58, y = 26, w = 388, h = 204;
+  let html = drawGrid(svg, x, y, w, h, 5, 0);
+  html += `<line x1="${x}" y1="${y+h}" x2="${x+w}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  html += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  for(let i = 0; i <= 5; i++){
+    const tickVal = 20 * i;
+    const py = y + h - (i / 5) * h;
+    html += `<text x="${x-12}" y="${py+6}" fill="${axisColor}" font-size="16" text-anchor="end">${tickVal}</text>`;
+  }
+  valuesA.forEach((a, i) => {
+    const b = valuesB[i];
+    const bx = x + 30 + i * 95;
+    const bw = 68;
+    const h1 = clamp(a / 100, 0, 1) * h;
+    const h2 = clamp(b / 100, 0, 1) * h;
+    const y1 = y + h - h1;
+    const y2 = y1 - h2;
+    html += `<rect x="${bx}" y="${y1}" width="${bw}" height="${h1}" rx="4" fill="var(--pressure)"/>`;
+    html += `<rect x="${bx}" y="${y2}" width="${bw}" height="${h2}" rx="4" fill="var(--pink)"/>`;
+    html += `<text x="${bx + bw/2}" y="${y + h + 30}" fill="${axisColor}" font-size="18" text-anchor="middle" transform="rotate(-18 ${bx + bw/2} ${y + h + 30})">${iterations[i].short}</text>`;
+  });
+  svg.innerHTML = html;
+}
+
+function drawLdLine(values){
+  const svg = qs('lineLd');
+  const W = 470, H = 320;
+  const x = 72, y = 26, w = 370, h = 210;
+  const minY = -0.90, maxY = -0.74;
+  let html = drawGrid(svg, x, y, w, h, 6, 0);
+  html += `<line x1="${x}" y1="${y+h}" x2="${x+w}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  html += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  for(let i = 0; i <= 6; i++){
+    const val = lerp(minY, maxY, i / 6);
+    const py = y + h - (i / 6) * h;
+    html += `<text x="${x-12}" y="${py+6}" fill="${axisColor}" font-size="16" text-anchor="end">${val.toFixed(2)}</text>`;
+  }
+  let path = '';
+  values.forEach((v, i) => {
+    const px = x + (i / (values.length - 1)) * w;
+    const py = y + h - ((v - minY) / (maxY - minY)) * h;
+    path += `${i === 0 ? 'M' : 'L'} ${px} ${py} `;
+  });
+  html += `<path d="${path}" fill="rgba(40,164,136,.9)" fill-opacity=".9" stroke="none"/>`;
+  html += `<path d="${path}" fill="none" stroke="var(--teal)" stroke-width="5"/>`;
+  values.forEach((v, i) => {
+    const px = x + (i / (values.length - 1)) * w;
+    const py = y + h - ((v - minY) / (maxY - minY)) * h;
+    html += `<circle cx="${px}" cy="${py}" r="9" fill="var(--teal)" stroke="#0f5141" stroke-width="3"/>`;
+    html += `<text x="${px}" y="${y + h + 34}" fill="${axisColor}" font-size="18" text-anchor="middle" transform="rotate(-18 ${px} ${y + h + 34})">${iterations[i].short}</text>`;
+  });
+  html += `<text x="26" y="${y + h/2}" fill="${axisColor}" font-size="19" transform="rotate(-90 26 ${y + h/2})">L/D ratio</text>`;
+  svg.innerHTML = html;
+}
+
+function makeWakeSeries(variant){
+  const pts = [];
+  for(let i = 0; i <= 30; i++){
+    const yn = i / 30;
+    const centerDip = Math.exp(-Math.pow((yn - 0.45) / 0.2, 2));
+    const shoulder = Math.exp(-Math.pow((yn - 0.1) / 0.08, 2)) + Math.exp(-Math.pow((yn - 0.9) / 0.08, 2));
+    const x = 1.02 - centerDip * variant.depth + shoulder * variant.overshoot + Math.sin(yn * 16 + variant.phase) * 0.01;
+    pts.push({x, y: yn});
+  }
+  return pts;
+}
+
+const wakeSeriesBase = [
+  makeWakeSeries({depth:0.58, overshoot:0.22, phase:0.0}),
+  makeWakeSeries({depth:0.56, overshoot:0.20, phase:0.4}),
+  makeWakeSeries({depth:0.55, overshoot:0.24, phase:0.9}),
+  makeWakeSeries({depth:0.52, overshoot:0.27, phase:1.2})
+];
+
+function drawWakeChart(t){
+  const svg = qs('wakeChart');
+  const W = 980, H = 330;
+  const x = 68, y = 24, w = 900, h = 224;
+  let html = drawGrid(svg, x, y, w, h, 5, 9);
+  html += `<line x1="${x}" y1="${y+h}" x2="${x+w}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  html += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  for(let i = 0; i <= 9; i++){
+    const val = 0.4 + i * 0.1;
+    const px = x + (i / 9) * w;
+    html += `<text x="${px}" y="${y+h+28}" fill="${axisColor}" font-size="18" text-anchor="middle">${val.toFixed(1)}</text>`;
+  }
+  for(let i = 0; i <= 5; i++){
+    const val = i / 5;
+    const py = y + h - (i / 5) * h;
+    html += `<text x="${x-12}" y="${py+6}" fill="${axisColor}" font-size="18" text-anchor="end">${val.toFixed(1)}</text>`;
+  }
+  html += `<text x="${x + w/2}" y="${y+h+64}" fill="${axisColor}" font-size="20" text-anchor="middle">U/U∞ (normalized velocity)</text>`;
+  html += `<text x="24" y="${y+h/2}" fill="${axisColor}" font-size="20" transform="rotate(-90 24 ${y+h/2})">y/H (normalized wake height)</text>`;
+
+  wakeSeriesBase.forEach((series, i) => {
+    const reveal = activeAmount(t, i);
+    if(reveal <= 0.01) return;
+    let d = '';
+    series.forEach((p, idx) => {
+      const xx = clamp(p.x + seriesNoise(i + idx * 0.03, t, 0.008), 0.4, 1.3);
+      const px = x + ((xx - 0.4) / 0.9) * w;
+      const py = y + h - p.y * h;
+      d += `${idx === 0 ? 'M' : 'L'} ${px} ${py} `;
+    });
+    html += `<path d="${d}" fill="none" stroke="${iterations[i].color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="${0.25 + reveal * 0.75}"/>`;
+  });
+  svg.innerHTML = html;
+}
+
+function makeCpSeries(offset, slopeAdjust, tailDip){
+  const pts = [];
+  for(let i = 0; i < 80; i++){
+    const x = i / 79;
+    const base = 0.88 - 1.15 * x + 0.12 * Math.cos(x * 8.5) - 0.08 * Math.sin(x * 14);
+    const shoulder = Math.exp(-Math.pow((x - 0.18) / 0.06, 2)) * -0.12;
+    const tail = Math.exp(-Math.pow((x - 0.96) / 0.03, 2)) * tailDip;
+    pts.push(base + shoulder + offset + slopeAdjust * x + tail);
+  }
+  return pts;
+}
+
+const cpSeriesBase = [
+  makeCpSeries(0.00, -0.03, -0.10),
+  makeCpSeries(0.01, -0.02, -0.08),
+  makeCpSeries(0.00, -0.01, -0.06),
+  makeCpSeries(-0.01, 0.00, -0.12)
+];
+
+function drawCpChart(t){
+  const svg = qs('cpChart');
+  const W = 980, H = 330;
+  const x = 68, y = 26, w = 900, h = 225;
+  const minY = -0.8, maxY = 1.0;
+  let html = drawGrid(svg, x, y, w, h, 9, 0);
+  html += `<line x1="${x}" y1="${y+h}" x2="${x+w}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  html += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y+h}" stroke="${axisColor}" stroke-width="2"/>`;
+  for(let i = 0; i <= 9; i++){
+    const val = lerp(minY, maxY, i / 9);
+    const py = y + h - (i / 9) * h;
+    html += `<text x="${x-12}" y="${py+6}" fill="${axisColor}" font-size="18" text-anchor="end">${Math.abs(val) < 0.001 ? '0' : val.toFixed(1)}</text>`;
+  }
+  for(let i = 0; i <= 7; i++){
+    const px = x + (i / 7) * w;
+    const label = i === 0 ? '1' : String(1 + i * 8);
+    html += `<text x="${px}" y="${y+h+28}" fill="${axisColor}" font-size="18" text-anchor="middle">${label}</text>`;
+  }
+  html += `<text x="${x + w/2}" y="${y+h+64}" fill="${axisColor}" font-size="20" text-anchor="middle">Surface position (chordwise index)</text>`;
+  html += `<text x="25" y="${y+h/2}" fill="${axisColor}" font-size="20" transform="rotate(-90 25 ${y+h/2})">Pressure coefficient (Cp)</text>`;
+
+  cpSeriesBase.forEach((series, i) => {
+    const reveal = activeAmount(t, i);
+    if(reveal <= 0.01) return;
+    let d = '';
+    series.forEach((v, idx) => {
+      const xf = idx / (series.length - 1);
+      const amp = reveal;
+      const yy = (v + seriesNoise(i + idx * 0.09, t, 0.03)) * amp;
+      const px = x + xf * w;
+      const py = y + h - ((yy - minY) / (maxY - minY)) * h;
+      d += `${idx === 0 ? 'M' : 'L'} ${px} ${py} `;
+    });
+    html += `<path d="${d}" fill="none" stroke="${iterations[i].color}" stroke-width="4" opacity="${0.25 + reveal * 0.75}"/>`;
+  });
+  svg.innerHTML = html;
+}
+
+function updateCards(metrics){
+  qs('cdCard').textContent = metrics.cd.toFixed(3);
+  qs('dragCard').textContent = metrics.drag.toFixed(1);
+  qs('clCard').textContent = formatSigned(metrics.cl, 3);
+  qs('ldCard').textContent = formatSigned(metrics.ld, 3);
+
+  if(metrics.phase.index === -1){
+    qs('cdDelta').textContent = 'Starting from zero';
+    qs('dragDelta').textContent = 'Waiting for first run';
+    qs('clDelta').textContent = 'No downforce yet';
+    qs('ldDelta').textContent = 'Iteration efficiency';
+    return;
+  }
+
+  const active = iterations[metrics.phase.index];
+  const bestPriorCd = Math.min(...iterations.slice(0, Math.max(1, metrics.phase.index)).map(it => it.cd));
+  const compareCd = metrics.phase.index === 0 ? 0 : ((bestPriorCd - active.cd) / bestPriorCd) * 100;
+  qs('cdDelta').innerHTML = metrics.phase.index === 0
+    ? `${active.name} baseline loaded`
+    : `Current concept <span class="${compareCd >= 0 ? 'good' : 'accent'}">${Math.abs(compareCd).toFixed(1)}%</span> ${compareCd >= 0 ? 'better' : 'vs'} best prior`;
+  qs('dragDelta').textContent = `${active.name} at 20 m/s`;
+  qs('clDelta').textContent = active.cl < 0 ? `${active.name} (downforce)` : `${active.name} (lift)`;
+  qs('ldDelta').textContent = `${active.name} efficiency`;
+}
+
+function updateTimeline(phase){
+  const steps = Array.from(document.querySelectorAll('.timeline-step'));
+  steps.forEach((step, i) => {
+    step.classList.toggle('done', phase.index > i);
+    step.classList.toggle('active', phase.index === i);
+  });
+}
+
+function render(t){
+  const loopT = t % duration;
+  const metrics = getDisplayedMetrics(loopT);
+
+  qs('phaseLabel').textContent = metrics.phase.label;
+  qs('iterationLabel').textContent = metrics.phase.index === -1 ? 'System warmup' : iterations[metrics.phase.index].name;
+  qs('timerLabel').textContent = `${loopT.toFixed(1)}s / ${duration.toFixed(1)}s`;
+  qs('footerNote').textContent = metrics.phase.note;
+
+  updateCards(metrics);
+  updateTimeline(metrics.phase);
+
+  drawBarChart('barCd', metrics.cdBars, 0.35, 'Cd', ['var(--blue)', 'var(--orange)', 'var(--purple)', 'var(--green)'], iterations.map(it => it.short), 2);
+  drawBarChart('barDrag', metrics.dragBars, 100, 'Drag force (N)', ['var(--blue)', 'var(--orange)', 'var(--purple)', 'var(--green)'], iterations.map(it => it.short), 0);
+  drawStackedChart(metrics.pressure, metrics.skin);
+  drawLdLine(metrics.ldLine);
+  drawWakeChart(loopT);
+  drawCpChart(loopT);
+}
+
+function tick(now){
+  const t = now / 1000;
+  render(t);
+  requestAnimationFrame(tick);
+}
+
+buildTimeline();
+render(0);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
